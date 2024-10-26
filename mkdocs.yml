@@ -1,0 +1,70 @@
+site_name: Personal Documentation
+site_description: Personal notes that are useful to me.
+site_author: myxi
+docs_dir: docs/
+repo_name: "myxi/personal-docs"
+repo_url: "https://codeberg.org/myxi/personal-docs"
+nav:
+    - Home: index.md
+    - C: c.md
+theme:
+    name: material
+    palette: gruvbox_dark
+    features:
+        - content.code.copy
+        - content.code.select
+        - content.code.annotate
+extra_css:
+    - "css/extra.css"
+theme:
+    name: material
+    palette:
+        - scheme: slate
+          primary: deep purple
+          toggle:
+              icon: material/brightness-4
+              name: Switch to light mode
+        - scheme: default
+          primary: indigo
+          toggle:
+              icon: material/brightness-7
+              name: Switch to dark mode
+    features:
+        - content.code.copy
+        - content.code.select
+        - content.code.annotate
+extra_css:
+    - css/extra.css
+
+markdown_extensions:
+    # Python Markdown
+    - abbr
+    - admonition
+    - attr_list
+    - def_list
+    - footnotes
+    - md_in_html
+    - toc:
+          permalink: true
+
+    # Python Markdown Extensions
+    - pymdownx.arithmatex:
+          generic: true
+    - pymdownx.betterem:
+          smart_enable: all
+    - pymdownx.caret
+    - pymdownx.details
+    - pymdownx.emoji:
+          emoji_index: !!python/name:material.extensions.emoji.twemoji
+          emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    - pymdownx.highlight
+    - pymdownx.inlinehilite
+    - pymdownx.keys
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.superfences
+    - pymdownx.tabbed:
+          alternate_style: true
+    - pymdownx.tasklist:
+          custom_checkbox: true
+    - pymdownx.tilde
