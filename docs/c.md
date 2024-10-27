@@ -138,10 +138,10 @@ Takes a pointer to an `int` as input. But makes a copy of the pointer.
     4 * 3 = 12, 4 * 6 = 24
     ```
 ### Arrays
-Since array addreses are consecutive, you can do quite a bit of sophisticated array
+Since array contiguous in memory, you can do quite a bit of sophisticated array
 manipulation using pointer arithmetic.
 === "Example I"
-	```c
+	```c linenums="1"
     #include <stdio.h>
 
     void printp(int *i) {
@@ -169,7 +169,7 @@ manipulation using pointer arithmetic.
     5
 	```
 === "Example II"
-	```c
+	```c linenums="1"
 	
     #include <stdio.h>
 
@@ -197,3 +197,74 @@ manipulation using pointer arithmetic.
     4
     5
 	```
+!!! important
+	```c linenums="1"
+	int a[N];
+	```
+	is equivalent to,
+	```c linenums="1"
+	const int *a;
+	```
+	`*a` is a pointer to the first element of the array.
+=== "Example I"
+    ```c linenums="1"
+    #include <stdio.h>
+
+    int main() {
+        int arr[] = {1,2,3,4};
+        for (int i = 0; i < 4; i++) {
+            printf("%p %d\n", arr+i, *(arr+i));
+        }
+
+        return 0;
+    }
+    ```
+=== "Output"
+	```
+    ./main
+    0x7ffd9a93ad90 1
+    0x7ffd9a93ad94 2
+    0x7ffd9a93ad98 3
+    0x7ffd9a93ad9c 4
+	```
+
+=== "Example II"
+	```c linenums="1"
+    #include <stdio.h>
+
+    int main() {
+        char text[] = "Test";
+        // char text[] = {'T', 'e', 's', 't', '\0'};
+        // char text[4] = {'T', 'e', 's', 't', '\0'};
+        for (int i = 0; i < (sizeof(text) / sizeof(char) - 1); i++) {
+            printf("%c", *(text+i));
+        }
+        printf("\n");
+
+        return 0;
+    }
+	```
+=== "Output"
+	```
+    ./main
+    Test
+
+	```
+=== "Example III"
+	```c linenums="1"
+    #include <stdio.h>
+
+    int main() {
+        int i = 69;
+        int* t[1][1] = {{&i}};
+        printf("%d\n", ***t); 
+
+        return 0;
+    }
+	```
+=== "Output"
+	```
+	./main
+	69
+	```
+<!--TODO: add docs for struct and -> operator-->
