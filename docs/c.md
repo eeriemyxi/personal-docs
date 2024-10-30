@@ -651,7 +651,7 @@ statement, but it’s useful for a scratch buffer.
 Variables created on the stack are always contiguous with each other, writing out of bounds can
 change the value of another variable.
 
-=== "An instance of Stack Overflow"
+=== "An Instance of Stack Overflow"
     ```c
     #include <string.h>
 
@@ -717,7 +717,7 @@ Libraries are archives of [object files](https://en.wikipedia.org/wiki/Object_fi
 sense object files are simply compiled byte code of your source code that is yet to be
 linked. Before linking your source code went through several stages, those stages as part of
 their process ensure your linker can do its job correctly and efficiently. Before linking
-your compiler only make reference to things like external functions like `printf`. A
+your compiler only makes reference to things like external functions like `printf`. A
 linker's job is to actually look for them and... Link them to your program.
 
 Once the linker is done with its job, it outputs an executable that you can run on a
