@@ -67,6 +67,71 @@ void somefunc(int *a)
 
 Takes a pointer to an `int` as input. But makes a copy of the pointer.
 
+### Constant Pointers
+Consider the following example,
+```c linenums="1"
+const int *ptr = &a;
+```
+Here, `ptr` points to `a` which is of `const int` type. What that means is that the value of `a` is read-only; _however_ that does not mean the pointer is read-only: the reference that `ptr` holds can be changed at any time,
+```c linenums="1"
+ptr = &b;
+```
+... Is perfectly legal.
+
+However if a constant pointer is declared, its value cannot be changed:
+```c linenums="1"
+const int *const ptr = &a;
+```
+=== "Example I"
+    ```c linenums="1"
+    #include <stdio.h>
+
+    int main(void) {
+        const int a = 69;
+        const int b = 420;
+    	const int *ptr = &a;
+
+    	printf("ptr: %d\n", *ptr);
+    	ptr = &b;
+    	printf("ptr: %d\n", *ptr);
+
+        return 0;
+    }
+    ```
+=== "Output"
+    ```
+    ./main
+    ptr: 69
+    ptr: 420
+    ```
+=== "Example II"
+    ```c linenums="1"
+    #include <stdio.h>
+
+    int main(void) {
+        const int a = 69;
+        const int b = 420;
+    	const int *const ptr = &a;
+
+    	printf("ptr: %d\n", *ptr);
+    	ptr = &b;
+
+        return 0;
+    }
+    ```
+=== "Output"
+    ```
+    main.c:9:6: error: cannot assign to variable 'ptr' with const-qualified type 'const int *const'
+        9 |         ptr = &b;
+          |         ~~~ ^
+    main.c:6:19: note: variable 'ptr' declared const here
+        6 |         const int *const ptr = &a;
+          |         ~~~~~~~~~~~~~~~~~^~~~~~~~
+    1 error generated.
+    ```
+    
+    As you can see, a constant pointer's value cannot be changed.
+
 ### Arithmetic
 !!! important
     When you increment a pointer of any type by `n`, it increments the pointer by the size of its type times `n`.
@@ -351,7 +416,7 @@ You declare function pointers with the following syntax:
 ## Dynamic Memory
 `malloc`, `calloc`, `realloc`, `free`, are available in `stdlib.h`.
 
-```c
+```c linenums="1"
 void *calloc(size_t nmemb, size_t size);
 void *malloc(size_t size);
 void *realloc(void *ptr, size_t size);
@@ -460,8 +525,8 @@ the call is equivalent to `free(ptr)`. Unless `ptr` is
 ### Memory Leaks
 Consider the following example,
 ```c linenums="1"
-include <stdio.h>
-include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 int main(void) {
@@ -494,7 +559,7 @@ from `malloc` at line 12 is lost. This loss of bytes is termed as a memory leak.
 `dest`. The memory areas may overlap: copying takes place as though the bytes in
 `src` are first copied into a temporary array that does not overlap `src` or `dest`, and the
 bytes are then copied from the temporary array to `dest`. 
-```c
+```c linenums="1"
 void *memcpy(void *dest, const void *src, size_t n);
 void *memmove(void *dest, const void *src, size_t n);
 ```
@@ -583,26 +648,29 @@ Look and understand the example below and then study the output.
     [MIPS](https://en.wikipedia.org/wiki/MIPS_architecture)</figcaption>
 </figure>
 
-Areas of memory of a program are called segments: the text segment, the stack segment, and the heap
-segment.
+Areas of memory of a program are called segments: the text segment, the stack segment,
+and the heap segment.
 
 - The **text** (or code) segment contains the compiled code of the executable.
-- The **stack** segment is used to store your local variables and is used for passing arguments to the functions
-along with the return address of the instruction which is to be executed after the function call is over.
-When a new stack frame needs to be added (as a result of a newly called function), the stack grows
-downward.
-- The **heap** segment is used when program allocate memory at runtime using `calloc` and `malloc`
-function, then memory gets allocated in heap. When some more memory need to be allocated using `calloc` and
-`malloc` function, heap grows upward as shown in above diagram.
+- The **stack** segment is used to store your local variables and is used for passing
+arguments to the functions along with the return address of the instruction which is to
+be executed after the function call is over. When a new stack frame needs to be added
+(as a result of a newly called function), the stack grows downward.
+- The **heap** segment is used when program allocate memory at runtime using `calloc`
+and `malloc` function, then memory gets allocated in heap. When some more memory need to
+be allocated using `calloc` and `malloc` function, heap grows upward as shown in above
+diagram.
 
-The stack and heap are traditionally located at opposite ends of the process’s virtual address space.
-The stack grows automatically when accessed, up to a size set by the kernel (which can be adjusted with
-`setrlimit(RLIMIT_STACK, ...)` on UNIX systems). The heap grows when the memory allocator invokes the
-`brk()` or `sbrk()` system call, mapping more pages of physical memory into the process’s virtual address space.
+The stack and heap are traditionally located at opposite ends of the process’s virtual
+address space. The stack grows automatically when accessed, up to a size set by the
+kernel (which can be adjusted with `setrlimit(RLIMIT_STACK, ...)` on UNIX systems). The
+heap grows when the memory allocator invokes the `brk()` or `sbrk()` system call,
+mapping more pages of physical memory into the process’s virtual address space.
 
-Implementation of both the stack and heap is usually down to the runtime/OS. Often games and other
-applications that are performance critical create their own memory solutions that grab a large chunk of
-memory from the heap and then dish it out internally to avoid relying on the OS for memory
+Implementation of both the stack and heap is usually down to the runtime/OS. Often games
+and other applications that are performance critical create their own memory solutions
+that grab a large chunk of memory from the heap and then dish it out internally to avoid
+relying on the OS for memory
 
 Stacks in computing architectures are regions of memory where data is added or removed in a [last-in-first-out](https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics))
 manner. In most modern computer systems, each thread has a reserved region of memory referred to as
@@ -652,7 +720,7 @@ Variables created on the stack are always contiguous with each other, writing ou
 change the value of another variable.
 
 === "An Instance of Stack Overflow"
-    ```c
+    ```c linenums="1"
     #include <string.h>
 
 
@@ -678,21 +746,16 @@ change the value of another variable.
 === "After"
     ![](https://files.catbox.moe/1lebjb.png)
 
-#### Heap Overflow
-A heap overflow, heap overrun, or heap smashing is a type of buffer overflow that occurs in the heap data area. Heap overflows are exploitable in a different manner to that of stack-based overflows. Memory on the heap is dynamically allocated at runtime and typically contains program data. Exploitation is performed by corrupting this data in specific ways to cause the application to overwrite internal structures such as linked list pointers. The canonical heap overflow technique overwrites dynamic memory allocation linkage (such as `malloc` metadata) and uses the resulting pointer exchange to overwrite a program function pointer.
-
-!!! tip
-	Read more [here](https://en.wikipedia.org/wiki/Heap_overflow).
-
 #### Heap
 
-The heap contains a linked list of used and free blocks. New allocations on the heap (by `new` (C++) or `malloc()`) are
-satisfied by creating a suitable block from one of the free blocks. This requires updating list of blocks on the
-heap. This meta information about the blocks on the heap is also stored on the heap often in a small area
-just in front of every block.
+The heap contains a linked list of used and free blocks. New allocations on the heap (by
+ `new` (C++) or `malloc()`) are satisfied by creating a suitable block from one of the
+free blocks. This requires  updating list of blocks on the heap. This meta information
+about the blocks on the heap is also stored on the heap  often in a small area just in
+front of every block.
 
-- The size of the heap is set on application startup, but can grow as space is needed (the allocator
-requests more memory from the operating system).
+- The size of the heap is set on application startup, but can grow as space is needed
+(the allocator requests more memory from the operating system).
 - Stored in computer RAM like the stack.
 - Variables on the heap must be destroyed manually and never fall out of scope. The data is freed with
 delete, delete[] or free
@@ -703,6 +766,19 @@ delete, delete[] or free
 - You would use the heap if you don’t know exactly how much data you will need at runtime or if you
 need to allocate a lot of data.
 - Responsible for memory leaks.
+
+#### Heap Overflow
+A heap overflow, heap overrun, or heap smashing is a type of buffer overflow that occurs
+in the heap data area. Heap overflows are exploitable in a different manner to that of
+stack-based overflows. Memory on the heap is dynamically allocated at runtime and
+typically contains program data. Exploitation is performed by corrupting this data in
+specific ways to cause the application to overwrite internal structures such as linked
+list pointers. The canonical heap overflow technique overwrites dynamic memory
+allocation linkage (such as `malloc` metadata) and uses the resulting pointer exchange
+to overwrite a program function pointer.
+
+!!! tip
+	Read more [here](https://en.wikipedia.org/wiki/Heap_overflow).
 
 ## Compilation
 
@@ -790,11 +866,11 @@ files.
 library.
 
 === "test.h"
-	```c
+	```c linenums="1"
 	int add(const int a, const int b);
 	```
 === "test.c"
-	```c
+	```c linenums="1"
 	#include "test.h"
 
 	int add(const int a, const int b) {
@@ -802,7 +878,7 @@ library.
 	}
 	```
 === "main.c"
-    ```c
+    ```c linenums="1"
     #include <stdio.h>
     #include "test.h"
 
@@ -818,3 +894,262 @@ library.
 ### Making and Using Dynamic Libraries
 Please read the Creating and Using Dynamic Libraries section from
 [here](https://galileo.phys.virginia.edu/compfac/courses/geek-hours/compilers-and-libs.html).
+
+## Type Qualifiers
+!!! tip
+	Refer to [this article
+	](https://webhome.phy.duke.edu/~rgb/General/c_book/c_book/chapter8/const_and_volat
+	ile.html) for more information on `const` and `volatile`.
+
+### `const` (C89)
+`const` is used with a datatype declaration or definition to specify an unchanging value.
+
+```c linenums="1"
+const int five = 5;
+const double pi = 3.141593;
+```
+
+`const` objects may not be changed.
+
+```c title="Illegal Uses of Const" linenums="1"
+const int five = 5;
+const double pi = 3.141593;
+
+pi = 3.2;
+five = 6;
+```
+
+### `volatile` (C89)
+
+`volatile` specifies a variable whose value may be changed by processes outside the current program
+
+=== "Example I"
+    ```c title="Volatile Object That Might Be a Buffer Used to Exchange Data With an External Device" linenums="1"
+    int check_iobuf(void) {
+    	volatile int iobuf;
+    	int val;
+
+    	while (iobuf == 0) {
+    	}
+    	val = iobuf;
+    	iobuf = 0;
+    	return(val);
+    }
+    ```
+    if `iobuf` had not been declared `volatile`, the compiler would notice that nothing happens inside the loop and thus eliminate the loop
+    `const` and `volatile` can be used together.
+
+	!!! note
+        An input-only buffer for an external device could be declared as `const volatile` (or `volatile const`, order is not important) to make sure the compiler knows that the variable should not be changed (because it is input-only) and that its value may be altered by processes other than the current program
+
+### `restrict` (C99)
+`restrict` keyword _hints_ the compiler no other pointer can be used to point to the 
+object that a pointer with this type qualifier points to.
+
+!!! tip
+	Read this [page](https://en.wikipedia.org/wiki/Restrict) for more inforamtion.
+
+### `_Atomic` (C11)
+Their purpose is to ensure race-free access to variables that are shared between
+different threads. Without atomic qualification, the state of a shared variable would be
+undefined if two threads access it concurrently.
+
+!!! note
+	For more information please refer to [this](https://stackoverflow.com/a/36955947) answer.
+
+=== "Example I"
+	```c title="Atomic Constant Integer Variable Declaration" linenums="1"
+	_Atomic const int name;
+	```
+
+!!! tip
+	Read about data races [here](https://stackoverflow.com/a/34550).
+
+## Storage Classes
+!!! tip
+	Refer to [this page](
+	https://sceweb.sce.uhcl.edu/helm/WEBPAGE-Cpp/my_files/TableContents/Module-10/module10page.html)
+    for more information. You can also find more information on [this thread](
+    https://stackoverflow.com/questions/3684450/what-is-the-difference-between-static-and-extern-in-c).
+
+### `auto`
+`auto` is the default storage class for all local variables. Automatic, or local, or stack variables only last for its scope's lifetime.
+=== "Example I"
+    ```c linenums="1"
+
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int* ret_ptr(void) {
+        auto int local_var = 69;
+        int *local_var_ptr = &local_var;
+
+        printf("ptr: %d\n", *local_var_ptr);
+
+        return local_var_ptr;
+    }
+
+    int main(void) {
+        int *local_var_ptr = ret_ptr();
+
+        int *ints = alloca(sizeof(int) * 5);
+        for (int i = 0; i < 5; i++) {
+            ints[i] = random();
+        }
+       
+    	printf("ptr: %d\n", *local_var_ptr);
+
+        return 0;
+    }
+    ```
+=== "Output"
+	```
+    ./main
+    ptr: 69
+    ptr: 1957747793
+	```
+### `static` (Internal Linkage)
+The `static` storage class instructs the compiler to keep a local variable in existence
+during the life-time of the program instead of creating and destroying it each time it
+comes into and goes out of scope. Therefore, making local variables `static` allows them
+to maintain their values between function calls.
+
+!!! note
+	`static` variables are by default initiliazed to zero. Non-static variables may also be
+    zero but you are entirely dependent on the compiler's implementation (undefined behavior).
+
+!!! note
+    When `static` is explicitly used for declaring a global variable (or function), it causes that
+    variable's scope to be restricted to the file in which it is declared.
+
+=== "Example 1"
+	```c linenums="1"
+	#include <stdio.h>
+    #include <stdlib.h>
+
+    int* ret_ptr(void) {
+        static int local_var = 69;
+        int *local_var_ptr = &local_var;
+
+        printf("ptr: %d\n", *local_var_ptr);
+
+        return local_var_ptr;
+    }
+
+    int main(void) {
+        int *local_var_ptr = ret_ptr();
+
+        int *ints = alloca(sizeof(int) * 100);
+        for (int i = 0; i < 100; i++) {
+            ints[i] = random();
+        }
+       
+    	printf("ptr: %d\n", *local_var_ptr);
+
+        return 0;
+    }
+    ```
+=== "Output"
+	```
+    ./main
+    ptr: 69
+    ptr: 69
+	```
+=== "Example II"
+	```c linenums="1"
+    #include <stdio.h>
+
+    static int count = 10;
+
+    void func(void) {
+        static int i = 5;
+        i++;
+        printf("i is %d and count is %d\n", i, count);
+    }
+
+    int main(void) {
+        while (count--) {
+            func();
+        }
+
+        return 0;
+    }
+	```
+=== "Output"
+	```
+    ./main
+    i is 6 and count is 9
+    i is 7 and count is 8
+    i is 8 and count is 7
+    i is 9 and count is 6
+    i is 10 and count is 5
+    i is 11 and count is 4
+    i is 12 and count is 3
+    i is 13 and count is 2
+    i is 14 and count is 1
+    i is 15 and count is 0
+    ```
+
+### `extern` (External Linkage)
+The `extern` storage class is used to give a reference of a global variable that is
+visible to ALL the program files. When you use `extern` the variable cannot be
+initialized as all it does is point the variable name at a storage location that has
+been previously defined.
+
+!!! inforamtion
+	When global variables (or functions) are declared, unless specified, they are classified with external linkage.
+
+=== "main.c"
+	```c linenums="1"
+    #include <stdio.h>
+
+    int count;
+    extern void write_extern();
+     
+    int main() {
+       count = 5;
+       write_extern();
+       return 0;
+    }
+    ```
+=== "support.c"
+	```c linenums="1"
+    #include <stdio.h>
+
+    extern int count;
+
+    void write_extern(void) {
+   		printf("count is %d\n", count);
+    }
+    ```
+=== "Output"
+	```
+	> gcc support.c main.c -o main
+	> ./main
+	5
+	```
+### `register`
+`register` keyword is used to suggest the compiler to put the variable in a CPU
+register. Since CPU registers is the fastest memory (and very scarce in quantity),
+it is recommended to be reserved for variables that are very frequently accessed.
+
+!!! tip
+	Read [this](https://gcc.gnu.org/onlinedocs/gcc/Global-Register-Variables.html) to know about global register variables.
+
+!!! important
+	`register` keyword merely reports a suggestion to the compiler; the compiler is within its legal rights to just ignore it if deemed unnecessary.
+
+!!! note
+	`register` variables don't have memory addresses since they are not in memory, so you are prohibited from using the `&` operator on such variables.
+
+```c title="How to Register Variables" linenums="1"
+register int name;
+```
+
+## Inline Functions
+`inline` specifier hints the compiler to put the body of a function in its parent scope when it is called; thus avoiding placing data on a new stack frame and retrieving its data. It is merely a hint, the compiler is free to do what is best for _actual_ performance gains.
+
+!!! tip
+	Read more about inline functions [here](https://en.cppreference.com/w/c/language/inline).
+
+A `static inline` function can be declared and defined with no restrictions, but there are restrictions for non-static inline functions. Read the citation in the tip for more information.
