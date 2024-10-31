@@ -4,6 +4,16 @@ In expressions `*` derefences a pointer, (and does other jobs as per grammar).
 
 In declarations `*` marks a variable as a pointer.
 
+```c linenums="1"
+void somefunc(int a)
+```
+Creates a copy of `a`
+
+```c linenums="1"
+void somefunc(int *a)
+```
+Takes a pointer to an `int` as input. But makes a copy of the pointer.
+
 !!! important
     The rule of declaration in C is, you declare it the way you use it.
 
@@ -52,20 +62,6 @@ In declarations `*` marks a variable as a pointer.
     ```
 ### Address Operator
 In expressions `&` gets you the address of a pointer.
-
-In declarations,
-
-```c linenums="1"
-void somefunc(int a)
-```
-
-Creates a copy of `a`
-
-```c linenums="1"
-void somefunc(int *a)
-```
-
-Takes a pointer to an `int` as input. But makes a copy of the pointer.
 
 ### Constant Pointers
 Consider the following example,
@@ -326,16 +322,7 @@ manipulation using pointer arithmetic.
 	./main
 	69
 	```
-### Structs
-My theory is that structs in C are namespaces. I can't be sure of course. When you
-declare a variable of a certain struct you are defining the variables in that struct under that
-variable, so the variable itself is now just a container or namespace.
-
-The part to note is that when you are declaring a variable as of certain struct type, you
-are also declaring the variables within that struct type under that variable (the
-variable is now just a namespace), and these variables are indeed instantiated (think of
-handling arrays).
-
+### Pointers in Structs
 === "Example I"
     ```c linenums="1"
     #include <stdio.h>
@@ -383,7 +370,7 @@ handling arrays).
     height: 1080, width: 720, name: Hello!
     height: 1080, width: 720, name: Hello!
     ```
-### Functions
+### Function Pointers
 You declare function pointers with the following syntax:
 ```
 <return type> (*<pointer_name>)(<argument type>, ...);
@@ -1153,3 +1140,94 @@ register int name;
 	Read more about inline functions [here](https://en.cppreference.com/w/c/language/inline).
 
 A `static inline` function can be declared and defined with no restrictions, but there are restrictions for non-static inline functions. Read the citation in the tip for more information.
+
+## Structs, Unions, and Enums
+A `struct` is also a collection of data items, except with a `struct` the data items can have different data types, and the individual fields within the `struct` are accessed by name instead of an integer index.
+
+!!! tip
+	Visit [this page](https://www.cs.uic.edu/~jbell/CourseNotes/C_Programming/Structures.html) for more information.
+
+### Tagged Structs
+```c
+struct Part {
+	int number, on_hand;
+	char name [ NAME_LEN + 1 ];
+	double price;
+};
+```
+The tag is `Part` in the above example, fields being its members. `struct Part` is now a valid data type.
+
+It is possible to simultaneously declare variables with the following syntax:
+```c
+struct Student {
+	int nClasses;
+	char name [ NAME_LEN + 1 ];
+	double gpa; 
+} joe, sue, mary;
+```
+### Anonymous Structs
+```c
+struct {
+	int nClasses;
+	char name [ NAME_LEN + 1 ];
+	double gpa; 
+} alice, bill;
+```
+Since there is no tag, there is no data type for this `struct`.
+
+### Struct Bit Fields
+To properly understand the usage of bit fields one needs very low-level knowledge of how computers work, how data-types are stored in memory, etc. However for a general introduction, check [this](https://www.opensourceforu.com/2012/01/joy-of-programming-understanding-bit-fields-c/).
+
+### Unions
+Unions are declared, created, and used exactly the same as structs, except for one key difference:
+
+- Structs allocate enough space to store all of the fields in the struct. The first one is stored at the beginning of the struct, the second is stored after that, and so on.
+- Unions only allocate enough space to store the largest field listed, and all fields are stored at the same space - the beginnion of the union.
+
+!!! important
+	All fields in a union share the same space, which can be used for any listed field but not more than one of them.
+
+In order to know which union field is actually stored, unions are often nested inside of
+structs, with an enumerated type indicating what is actually stored there.
+
+```c
+typedef struct Flight {
+    enum { PASSENGER, CARGO } type;
+    union {
+        int npassengers;
+        double tonnages;
+    } cargo;
+} Flight;
+
+Flight flights[1000];
+
+flights[42].type = PASSENGER;
+flights[42].cargo.npassengers = 150;
+
+flights[20].type = CARGO;
+flights[20].cargo.tonnages = 356.78;
+```
+### Enums
+Enumerated data types are a special form of integers with the following constraints:
+- Only certain pre-determined values are allowed.
+- Each valid value is assigned a name, which is then normally used instead of integer values when working with this data type.
+
+```c
+enum suits { CLUBS, HEARTS, SPADES, DIAMONDS, NOTRUMP } trump;
+enum suits ew_bid, ns_bid;
+
+typedef enum Direction { NORTH, SOUTH, EAST, WEST } Direction;
+
+Direction next_move = NORTH;
+```
+Values may be assigned to specific enum value names.
+- Any names without assigned values will get one higher than the previous entry.
+- If the first name does not have an assigned value, it gets the value of zero.
+- It is even legal to assign the same value to more than one name.
+
+```c
+enum Errors {
+    NONE=0, MINOR1=100, MINOR2, MINOR3,
+    MAJOR1=1000, MAJOR2, DIVIDE_BY_ZERO=1000
+};
+```
